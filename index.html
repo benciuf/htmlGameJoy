@@ -17,18 +17,26 @@ canvas {
 <script>
 
 var myGamePiece;
+var myApples;
+var screenW = 300;
+var screenH = 400;
+var sizeBasket = 30;
+var maxSizeApples = 13;
 
 function startGame() {
-	xpos = Math.floor(Math.random() * 400);
+	xPos = Math.floor(Math.random() * screenW * .9);
+	applePos = Math.floor(Math.random() * screenW * .9);
+	rApple = Math.floor(Math.random() * maxSizeApples) + 5;
+    myGamePiece = new component(sizeBasket, sizeBasket / 3, "brown", xPos, screenH * .9);
+	myApples  = new component(rApple, rApple,"green", applePos, 0);
     myGameArea.start();
-    myGamePiece = new component(30, 30, "blue", xpos, 440);
 }
 
 var myGameArea = {
     canvas : document.createElement("canvas"),
     start : function() {
-        this.canvas.width = 480;
-        this.canvas.height = 480;
+        this.canvas.width = screenW;
+        this.canvas.height = screenH;
         this.context = this.canvas.getContext("2d");
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
 		this.interval = setInterval(updateGameArea, 20);
@@ -38,11 +46,12 @@ var myGameArea = {
         window.addEventListener('keyup', function (e) {
             myGameArea.key = false;
         })
-		
-		
     },
 	clear : function() {
 		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+	},
+	stop : function() {
+		clearInterval(this.interval);
 	}
 }
 
@@ -50,6 +59,7 @@ function component(width, height, color, x, y) {
 	this.gamearea = myGameArea;
     this.width = width;
     this.height = height;
+	//this.radius = radius;
 	this.speedX = 0;
 	this.speedY = 0;
     this.x = x;
@@ -63,23 +73,44 @@ function component(width, height, color, x, y) {
 		this.x += this.speedX;
 		this.y += this.speedY;		
 	}
+	this.crashWith = function(otherobj) {
+		var myleft = this.x;
+		var myright = this.x + (this.width);
+		var mytop = this.y;
+		var mybottom = this.y + (this.height);
+		var otherleft = otherobj.x;
+		var otherright = otherobj.x + (otherobj.width);
+		var othertop = otherobj.y;
+		var otherbottom = otherobj.y + (otherobj.height);
+		var crash = true;
+		if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
+			crash = false;
+			}
+		return crash;
+	}
 }
 
 function updateGameArea() {
-	myGameArea.clear();
-	myGamePiece.speedX = 0;
-	myGamePiece.speedY = 0;
-	if (myGameArea.key && myGameArea.key == 37) {myGamePiece.speedX = -5; }
-	if (myGameArea.key && myGameArea.key == 39) {myGamePiece.speedX = 5; }
-	if (myGameArea.key && myGameArea.key == 38) {myGamePiece.speedY = -5; }
-	if (myGameArea.key && myGameArea.key == 40) {myGamePiece.speedY = 5; }
-	myGamePiece.newPos();
-	myGamePiece.update();
+	if(myGamePiece.crashWith(myApples)) {
+		myGameArea.stop();
+		window.alert("GAME OVER");
+	} else {
+		myGameArea.clear();
+		myApples.update();
+		myGamePiece.speedX = 0;
+		myGamePiece.speedY = 0;
+		if (myGameArea.key && myGameArea.key == 37) {myGamePiece.speedX = -5; }
+		if (myGameArea.key && myGameArea.key == 39) {myGamePiece.speedX = 5; }
+		if (myGameArea.key && myGameArea.key == 38) {myGamePiece.speedY = -5; }
+		if (myGameArea.key && myGameArea.key == 40) {myGamePiece.speedY = 5; }
+		myGamePiece.newPos();
+		myGamePiece.update();
+	}
 }
 
 </script>
 
-<p>Use Arrows to move the blue square. SPEED = 5</p>
+<p>Add apples and Game over on collide. </p>
 
 </body>
 </html>
