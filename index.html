@@ -123,7 +123,12 @@ function updateGameArea() {
 	myGamePiece.newPos();
 	myGamePiece.update();
 }
+	
+/*function moveup() {
+    myGamePiece.speedY = -1; 
+}
 
+<<<<<<< HEAD
 function everyinterval(n) {
 	if ((myGameArea.frameNo / n) % 1 == 0) {return true;}
 	return false;
@@ -141,6 +146,16 @@ function moveleft() {
     myGamePiece.speedX = -1; 
 }
 
+=======
+function movedown() {
+    myGamePiece.speedY = 1; 
+}*/
+
+function moveleft() {
+    myGamePiece.speedX = -1; 
+}
+
+>>>>>>> origin/master
 function moveright() {
     myGamePiece.speedX = 1; 
 }
@@ -150,12 +165,20 @@ function clearmove() {
     myGamePiece.speedY = 0; 
 }
 </script>
+<<<<<<< HEAD
 </script>
 <div style="text-align:center;width:480px;">
   <button onmousedown="moveup()" onmouseup="clearmove()" ontouchstart="moveup()">UP</button><br><br>
   <button onmousedown="moveleft()" onmouseup="clearmove()" ontouchstart="moveleft()">LEFT</button>
   <button onmousedown="moveright()" onmouseup="clearmove()" ontouchstart="moveright()">RIGHT</button><br><br>
   <button onmousedown="movedown()" onmouseup="clearmove()" ontouchstart="movedown()">DOWN</button>
+=======
+<div style="text-align:center;width:480px;">
+  <!--button onmousedown="moveup()" onmouseup="clearmove()" ontouchstart="moveup()">UP</button><br><br-->
+  <button onmousedown="moveleft()" onmouseup="clearmove()" ontouchstart="moveleft()">LEFT</button>
+  <button onmousedown="moveright()" onmouseup="clearmove()" ontouchstart="moveright()">RIGHT</button><br><br>
+  <!--button onmousedown="movedown()" onmouseup="clearmove()" ontouchstart="movedown()">DOWN</button-->
+>>>>>>> origin/master
 </div>
 <p>Add apples and Game over on collide. </p>
 
