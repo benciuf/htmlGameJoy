@@ -1,53 +1,40 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<style>
-canvas {
-    border:1px solid #d3d3d3;
-    background-color: #f1f1f1;
-	padding-left: 0;
-    padding-right: 0;
-    margin: auto;
-    display: block;
-}
-</style>
-</head>
-<body onload="startGame()">
+@@ -17,18 +17,26 @@ canvas {
 <script>
 
 var myGamePiece;
-var myApples = [];
+var myApples;
 var screenW = 300;
 var screenH = 400;
 var sizeBasket = 30;
 var maxSizeApples = 13;
-var dropSpeed = 3;
-var xPos = Math.floor(Math.random() * screenW * .9);
-var applePos = Math.floor(Math.random() * screenW * .9);
-var rApple = Math.floor(Math.random() * maxSizeApples) + 5;
 
 function startGame() {
+	xpos = Math.floor(Math.random() * 400);
+	xPos = Math.floor(Math.random() * screenW * .9);
+	applePos = Math.floor(Math.random() * screenW * .9);
+	rApple = Math.floor(Math.random() * maxSizeApples) + 5;
     myGamePiece = new component(sizeBasket, sizeBasket / 3, "brown", xPos, screenH * .9);
-	//myApples  = new component(rApple, rApple, "green", applePos, 0);
+	myApples  = new component(rApple, rApple,"green", applePos, 0);
     myGameArea.start();
+    myGamePiece = new component(30, 30, "blue", xpos, 440);
 }
 
 var myGameArea = {
     canvas : document.createElement("canvas"),
     start : function() {
+        this.canvas.width = 480;
+        this.canvas.height = 480;
         this.canvas.width = screenW;
         this.canvas.height = screenH;
         this.context = this.canvas.getContext("2d");
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
-		this.frameNo = 0;
 		this.interval = setInterval(updateGameArea, 20);
-		window.addEventListener('keydown', function (e) {
-            myGameArea.key = e.keyCode;
-        })
+@@ -38,11 +46,12 @@ var myGameArea = {
         window.addEventListener('keyup', function (e) {
             myGameArea.key = false;
         })
+		
+		
     },
 	clear : function() {
 		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -57,7 +44,7 @@ var myGameArea = {
 	}
 }
 
-function component(width, height, color, x, y) {
+@@ -50,6 +59,7 @@ function component(width, height, color, x, y) {
 	this.gamearea = myGameArea;
     this.width = width;
     this.height = height;
@@ -65,13 +52,7 @@ function component(width, height, color, x, y) {
 	this.speedX = 0;
 	this.speedY = 0;
     this.x = x;
-    this.y = y;    
-	this.update = function() {
-		ctx = myGameArea.context;
-		ctx.fillStyle = color;
-		ctx.fillRect(this.x, this.y, this.width, this.height);
-	}
-	this.newPos = function() {
+@@ -63,23 +73,44 @@ function component(width, height, color, x, y) {
 		this.x += this.speedX;
 		this.y += this.speedY;		
 	}
@@ -93,93 +74,35 @@ function component(width, height, color, x, y) {
 }
 
 function updateGameArea() {
-	var x, y;
-	for(i = 0; i < myApples.length; i += 1) {
-		if (myGamePiece.crashWith(myApples[i])) {
-			myGameArea.stop();
-			if(!alert('GAME OVER')){window.location.reload();}
-			return;
-		}
-	}
 	myGameArea.clear();
-	myGameArea.frameNo += 1;
-	if (myGameArea.frameNo == 1 || everyinterval(150)) {
-		x = myGameArea.canvas.width;
-		y = myGameArea.canvas.height + 200;
-		myApples.push(new component (rApple, rApple, "green", x, y));
-		//myApples  = new component(rApple, rApple, "green", applePos, 0);
-	}
-	for (i = 0; i< myApples.length; i += 1) {
-		myApples[i].x += 1;
-		myApples[i].update();
-		myApples.y += dropSpeed;
-	}
 	myGamePiece.speedX = 0;
 	myGamePiece.speedY = 0;
 	if (myGameArea.key && myGameArea.key == 37) {myGamePiece.speedX = -5; }
 	if (myGameArea.key && myGameArea.key == 39) {myGamePiece.speedX = 5; }
-	//if (myGameArea.key && myGameArea.key == 38) {myGamePiece.speedY = -5; }
-	//if (myGameArea.key && myGameArea.key == 40) {myGamePiece.speedY = 5; }
+	if (myGameArea.key && myGameArea.key == 38) {myGamePiece.speedY = -5; }
+	if (myGameArea.key && myGameArea.key == 40) {myGamePiece.speedY = 5; }
 	myGamePiece.newPos();
 	myGamePiece.update();
-}
-	
-/*function moveup() {
-    myGamePiece.speedY = -1; 
-}
-
-<<<<<<< HEAD
-function everyinterval(n) {
-	if ((myGameArea.frameNo / n) % 1 == 0) {return true;}
-	return false;
-}
-
-function moveup() {
-    myGamePiece.speedY = -1; 
-}
-
-function movedown() {
-    myGamePiece.speedY = 1; 
+	if(myGamePiece.crashWith(myApples)) {
+		myGameArea.stop();
+		window.alert("GAME OVER");
+	} else {
+		myGameArea.clear();
+		myApples.update();
+		myGamePiece.speedX = 0;
+		myGamePiece.speedY = 0;
+		if (myGameArea.key && myGameArea.key == 37) {myGamePiece.speedX = -5; }
+		if (myGameArea.key && myGameArea.key == 39) {myGamePiece.speedX = 5; }
+		if (myGameArea.key && myGameArea.key == 38) {myGamePiece.speedY = -5; }
+		if (myGameArea.key && myGameArea.key == 40) {myGamePiece.speedY = 5; }
+		myGamePiece.newPos();
+		myGamePiece.update();
+	}
 }
 
-function moveleft() {
-    myGamePiece.speedX = -1; 
-}
-
-=======
-function movedown() {
-    myGamePiece.speedY = 1; 
-}*/
-
-function moveleft() {
-    myGamePiece.speedX = -1; 
-}
-
->>>>>>> origin/master
-function moveright() {
-    myGamePiece.speedX = 1; 
-}
-
-function clearmove() {
-    myGamePiece.speedX = 0; 
-    myGamePiece.speedY = 0; 
-}
 </script>
-<<<<<<< HEAD
-</script>
-<div style="text-align:center;width:480px;">
-  <button onmousedown="moveup()" onmouseup="clearmove()" ontouchstart="moveup()">UP</button><br><br>
-  <button onmousedown="moveleft()" onmouseup="clearmove()" ontouchstart="moveleft()">LEFT</button>
-  <button onmousedown="moveright()" onmouseup="clearmove()" ontouchstart="moveright()">RIGHT</button><br><br>
-  <button onmousedown="movedown()" onmouseup="clearmove()" ontouchstart="movedown()">DOWN</button>
-=======
-<div style="text-align:center;width:480px;">
-  <!--button onmousedown="moveup()" onmouseup="clearmove()" ontouchstart="moveup()">UP</button><br><br-->
-  <button onmousedown="moveleft()" onmouseup="clearmove()" ontouchstart="moveleft()">LEFT</button>
-  <button onmousedown="moveright()" onmouseup="clearmove()" ontouchstart="moveright()">RIGHT</button><br><br>
-  <!--button onmousedown="movedown()" onmouseup="clearmove()" ontouchstart="movedown()">DOWN</button-->
->>>>>>> origin/master
-</div>
+
+<p>Use Arrows to move the blue square. SPEED = 5</p>
 <p>Add apples and Game over on collide. </p>
 
 </body>
