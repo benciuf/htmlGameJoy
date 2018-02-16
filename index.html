@@ -6,28 +6,34 @@
 canvas {
     border:1px solid #d3d3d3;
     background-color: #f1f1f1;
-	//padding-left: 0;
-    //padding-right: 0;
-    //margin: auto;
-    //display: block;
+	padding-left: 0;
+    padding-right: 0;
+    margin: auto;
+    display: block;
 }
 </style>
 </head>
 <body onload="startGame()">
 <script>
 
-var myGamePiece;
+var myBasket;
 //var myApples = new Array();
 var myApples = [];
-var screenW = 480;
-var screenH = 270;
-var sizeBasket = 30;
+var screenW = 500;
+var screenH = 500;
+var sizeBasket = 40;
+var speedBasket = 5;
+var minSizeApple = 5
 var maxSizeApples = 10;
-var dropSpeed = 3;
+var dropSpeed = 2;
+var speedAppleGenerator = 130;
+var points = 0;
+var appleColor = "green";
 
 function startGame() {
 	var xPos = Math.floor(Math.random() * screenW * .9);
-    myGamePiece = new component(sizeBasket, sizeBasket / 3, "brown", xPos, screenH * .95);
+    myBasket = new component(sizeBasket, sizeBasket / 4, "brown", xPos, screenH * .95);
+	myScore = new component("20px", "Consolas", "black", 0, 20, "text");
 	myGameArea.start();
 }
 
@@ -49,24 +55,31 @@ var myGameArea = {
     }    
 }
 
-function component(width, height, color, x, y) {
+function component(width, height, color, x, y, type) {
+	this.type = type;
     this.width = width;
     this.height = height;
 	this.speedX = 0;
 	this.speedY = 0;
     this.x = x;
-    this.y = y;    
+    this.y = y;
 	this.update = function() {
         ctx = myGameArea.context;
-        ctx.fillStyle = color;
-        ctx.fillRect(this.x, this.y, this.width, this.height);
+		if (this.type == "text") {
+			ctx.font = this.width + " " + this.height;
+			ctx.fillStyle =color;
+			ctx.fillText(this.text, this.x, this.y);
+		} else {
+			ctx.fillStyle = color;
+			ctx.fillRect(this.x, this.y, this.width, this.height);
+		}
     }
 
 	this.newPos = function() {
-		this.x += this.speedX;
-		this.y += this.speedY;		
+			this.x += this.speedX;  
+			//this.y += this.speedY;	
 	}
-	this.crashWith = function(otherobj) {
+	this.catchWith = function(otherobj) {
         var myleft = this.x;
         var myright = this.x + (this.width);
         var mytop = this.y;
@@ -75,43 +88,43 @@ function component(width, height, color, x, y) {
         var otherright = otherobj.x + (otherobj.width);
         var othertop = otherobj.y;
         var otherbottom = otherobj.y + (otherobj.height);
-        var crash = true;
+        var catchApple = false;
         if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
-            crash = false;
+            catchApple = true;
         }
-        return crash;
+        return catchApple;
     }
 }
 
 function updateGameArea() {
 	var x, y;
+	var applePos = Math.floor(Math.random() * screenW * .9);
+	var rApple = Math.floor(Math.random() * maxSizeApples) + minSizeApple;
 	for(i = 0; i < myApples.length; i += 1) {
-		if (myGamePiece.crashWith(myApples[i])) {
+		if (!myBasket.catchWith(myApples[i])) {
+			points++;
+		}
+		if (points/50 === 30) {
 			myGameArea.stop();
-			if(!alert('GAME OVER')){window.location.reload();}
+			if(!alert('GAME OVER \n Ai cules de ajuns \n Press OK to restart!')){window.location.reload();}
 			return;
 		}
 	}
 	myGameArea.clear();
-	myGameArea.frameNo += 1;
-	var applePos = Math.floor(Math.random() * screenW * .9);
-	var rApple = Math.floor(Math.random() * maxSizeApples) + 4;	
-	if (myGameArea.frameNo == 1 || everyinterval(100)) {
-		/*x = myGameArea.canvas.width - rApple; console.log( rApple + " " + x );
-		y = myGameArea.canvas.height; console.log(y);	
-		//myApples.push(new component (10, 0, "green", x, y));
-		myApples  = new component(rApple, rApple, "green", applePos, screenW * .005 - rApple); console.log(rApple + " " + applePos);
-		*/
-		x = myGameArea.canvas.width;
-        y = myGameArea.canvas.height - 100;
-        myApples.push(new component(10, 100, "green", x, y));
+	myGameArea.frameNo += 1;	
+	if (myGameArea.frameNo == 1 || everyinterval(speedAppleGenerator)) {
+		x = applePos;
+        y = 0;
+        myApples.push(new component(rApple, rApple, appleColor, x, y));
 	}
 	for (i = 0; i< myApples.length; i += 1) {
-		myApples[i].x += -1;
+		myApples[i].y += dropSpeed;
 		myApples[i].update();
 	}
-	myGamePiece.newPos();
-	myGamePiece.update();
+	myScore.text = "SCORE: " + (points/50) + " kg de mere";
+	myScore.update();
+	myBasket.newPos();
+	myBasket.update();
 }
 
 function everyinterval(n) {
@@ -120,33 +133,34 @@ function everyinterval(n) {
 }
 
 function moveup() {
-    myGamePiece.speedY = -5; 
+    myBasket.speedY = -speedBasket;
 }
 
 function movedown() {
-    myGamePiece.speedY = 5; 
+    myBasket.speedY = speedBasket;
 }
 
 function moveleft() {
-    myGamePiece.speedX = -5; 
+	if(myBasket.x > 0){myBasket.speedX = -speedBasket;} console.log('left: ' + myBasket.x);
 }
 
 function moveright() {
-    myGamePiece.speedX = 5; 
+    if(myBasket.x < screenW - sizeBasket){myBasket.speedX = speedBasket;} console.log('right: ' + myBasket.x);
 }
 
 function clearmove() {
-    myGamePiece.speedX = 0; 
-    myGamePiece.speedY = 0; 
+    myBasket.speedX = 0;
+    myBasket.speedY = 0;
 }
 </script></br>
-<div style="text-align:center;width:480px;">
-  <button onmousedown="moveup()" onmouseup="clearmove()" ontouchstart="moveup()">UP</button><br><br>
+<div style="text-align:center;width:480px;padding-left: 0;padding-right: 0;margin: auto;">
+  <!--button onmousedown="moveup()" onmouseup="clearmove()" ontouchstart="moveup()">UP</button><br><br-->
   <button onmousedown="moveleft()" onmouseup="clearmove()" ontouchstart="moveleft()">LEFT</button>
   <button onmousedown="moveright()" onmouseup="clearmove()" ontouchstart="moveright()">RIGHT</button><br><br>
-  <button onmousedown="movedown()" onmouseup="clearmove()" ontouchstart="movedown()">DOWN</button>
+  <!--button onmousedown="movedown()" onmouseup="clearmove()" ontouchstart="movedown()">DOWN</button-->
 </div>
-<p>Add apples and Game over on collide. </p>
-
+<p style="text-align:center;width:480px;padding-left: 0;padding-right: 0;margin: auto">
+The bigger the apple, the bigger the score!
+</p>
 </body>
 </html>
